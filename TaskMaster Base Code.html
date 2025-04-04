@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #7e22ce;
+            --primary-light: #a855f7;
+            --secondary: #0ea5e9;
+            --gray: #6b7280;
+            --danger: #ef4444;
+            --radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            color: #333;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container, .footer {
+            width: 100%;
+            max-width: 600px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .container { margin-bottom: 30px; }
+
+        h1, h3, h2 {
+            color: var(--primary);
+        }
+
+        h1 { font-size: 2.2rem; }
+
+        header {
+            display: flex;
+            justify-content: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius);
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .change-name {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+            margin-top: 5px;
+        }
+
+        .task-form {
+            margin: 0 auto 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            max-width: 500px;
+        }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: var(--radius) 0 0 var(--radius);
+            font-size: 1rem;
+        }
+
+        button {
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 0 20px;
+            cursor: pointer;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        select, input[type="date"] {
+            padding: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: var(--radius);
+            background-color: white;
+            flex: 1;
+        }
+
+        .reminder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        ul {
+            list-style: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 10px;
+            background-color: white;
+            text-align: left;
+            transition: transform 0.3s;
+            animation: fadeIn 0.3s;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-item.high { border-left: 4px solid var(--danger); }
+        .task-item.medium { border-left: 4px solid orange; }
+        .task-item.low { border-left: 4px solid var(--secondary); }
+
+        .task-checkbox { margin-right: 15px; }
+
+        .task-checkbox input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .task-content { flex-grow: 1; }
+        .completed { text-decoration: line-through; color: var(--gray); }
+        
+        .task-due {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+
+        #empty-message {
+            padding: 20px;
+            color: var(--gray);
+            font-style: italic;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 25px;
+            width: 80%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            z-index: 1001;
+            animation: fadeDown 0.3s;
+        }
+
+        @keyframes fadeDown {
+            from { transform: translate(-50%, -20px); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        .contact-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        .contact-item i { color: var(--primary); }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .snapchat { background-color: #FFFC00; color: black; }
+        .linkedin { background-color: #0077B5; }
+        .whatsapp { background-color: #25D366; }
+        .youtube { background: linear-gradient(135deg, #FF0000, #CC0000); }
+
+        .copyright, .current-datetime {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TaskMaster ✓</h1>
+        </header>
+
+        <div class="user-info">
+            <div class="avatar" id="user-avatar"></div>
+            <div>
+                <h3>Welcome, <span id="username-display">Friend</span>!</h3>
+                <p id="current-date"></p>
+                <div class="change-name" id="change-name-btn">Change name</div>
+            </div>
+        </div>
+
+        <form class="task-form" id="task-form">
+            <div class="input-group">
+                <input type="text" id="task-input" placeholder="Add a new task..." required>
+                <button type="submit"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="options">
+                <select id="task-priority">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <input type="date" id="task-due-date">
+            </div>
+            <div class="reminder">
+                <input type="checkbox" id="reminder-toggle">
+                <label for="reminder-toggle">Remind me about this task</label>
+            </div>
+        </form>
+
+        <h2>My Tasks</h2>
+        <ul id="task-list"></ul>
+        <p id="empty-message">No tasks yet. Add your first task above!</p>
+    </div>
+
+    <div class="footer">
+        <h3>Contact Information</h3>
+        <div class="contact-info">
+            <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <span>+91 9781570098</span>
+            </div>
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <span>anshdeep200618@gmail.com</span>
+            </div>
+        </div>
+        
+        <h3>Connect With Me</h3>
+        <div class="social-links">
+            <a href="https://insta.openinapp.co/itsanshdeepofficial" class="social-link instagram" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://snap.openinapp.co/anshdeep200618" class="social-link snapchat" title="Snapchat">
+                <i class="fab fa-snapchat-ghost"></i>
+            </a>
+            <a href="https://linkedin.openinapp.co/anshdeep-singh-editor" class="social-link linkedin" title="LinkedIn">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="https://whatsapp.openinapp.co/Ansh" class="social-link whatsapp" title="WhatsApp">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+            <a href="https://yt.openinapp.co/RojanaBhaktii" class="social-link youtube" title="YouTube">
+                <i class="fab fa-youtube"></i>
+            </a>
+        </div>
+        
+        <p class="copyright">
+            &copy; 2025 TaskMaster by Anshdeep Singh. All rights reserved.
+        </p>
+
+    </div>
+
+    <!-- Username Modal -->
+    <div class="modal" id="username-modal">
+        <div class="modal-content">
+            <h2>Welcome to TaskMaster!</h2>
+            <p>Please enter your name:</p>
+            <form id="username-form" style="margin-top: 20px;">
+                <div class="input-group">
+                    <input type="text" id="username-input" placeholder="Your name" value="Ansh200618" required>
+                    <button type="submit">Start</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const taskForm = document.getElementById('task-form');
+            const taskInput = document.getElementById('task-input');
+            const taskList = document.getElementById('task-list');
+            const taskPriority = document.getElementById('task-priority');
+            const taskDueDate = document.getElementById('task-due-date');
+            const reminderToggle = document.getElementById('reminder-toggle');
+            const emptyMessage = document.getElementById('empty-message');
+            const currentDateElement = document.getElementById('current-date');
+            const usernameModal = document.getElementById('username-modal');
+            const usernameForm = document.getElementById('username-form');
+            const usernameInput = document.getElementById('username-input');
+            const usernameDisplay = document.getElementById('username-display');
+            const userAvatar = document.getElementById('user-avatar');
+            const changeNameBtn = document.getElementById('change-name-btn');
+            
+            // Set current date
+            const today = new Date();
+            currentDateElement.textContent = today.toDateString();
+            taskDueDate.min = today.toISOString().split('T')[0];
+            
+            // Load saved data
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let username = localStorage.getItem('username') || 'Ansh200618';
+            
+            // Initialize app
+            if (!username) {
+                usernameModal.style.display = 'block';
+            } else {
+                updateUsername(username);
+            }
+            renderTasks();
+            checkReminders();
+            
+            // Event listeners
+            usernameForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const newUsername = usernameInput.value.trim();
+                if (newUsername) {
+                    username = newUsername;
+                    localStorage.setItem('username', username);
+                    updateUsername(username);
+                    usernameModal.style.display = 'none';
+                    showNotification(`Welcome, ${username}!`);
+                }
+            });
+            
+            changeNameBtn.addEventListener('click', function() {
+                usernameInput.value = username;
+                usernameModal.style.display = 'block';
+            });
+            
+            taskForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const text = taskInput.value.trim();
+                if (!text) return;
+                
+                const newTask = {
+                    id: Date.now().toString(),
+                    text: text,
+                    priority: taskPriority.value,
+                    dueDate: taskDueDate.value || null,
+                    completed: false,
+                    reminder: reminderToggle.checked
+                };
+                
+                tasks.unshift(newTask);
+                saveAndRender();
+                
+                // Reset form
+                taskInput.value = '';
+                taskPriority.value = 'medium';
+                taskDueDate.value = '';
+                reminderToggle.checked = false;
+                
+                showNotification('Task added successfully!');
+            });
+            
+            taskList.addEventListener('change', function(e) {
+                if (e.target.type === 'checkbox') {
+                    const taskId = e.target.closest('.task-item').dataset.id;
+                    const taskIndex = tasks.findIndex(task => task.id === taskId);
+                    
+                    if (taskIndex !== -1) {
+                        tasks[taskIndex].completed = e.target.checked;
+                        saveAndRender();
+                        
+                        if (e.target.checked) {
+                            showNotification('Task completed!');
+                        }
+                    }
+                }
+            });
+            
+            // Helper functions
+            function updateUsername(name) {
+                usernameDisplay.textContent = name;
+                userAvatar.textContent = name.charAt(0).toUpperCase();
+            }
+            
+            function showNotification(message, isReminder = false) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                
+                if (isReminder) {
+                    notification.style.background = 'linear-gradient(to right, #f59e0b, #f97316)';
+                }
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translate(-50%, -20px)';
+                    setTimeout(() => notification.remove(), 300);
+                }, 4000);
+            }
+            
+            function checkReminders() {
+                const now = new Date();
+                tasks.forEach(task => {
+                    if (!task.completed && task.reminder && task.dueDate) {
+                        const dueDate = new Date(task.dueDate);
+                        if (dueDate.toDateString() === now.toDateString()) {
+                            showNotification(`Reminder: "${task.text}" is due today!`, true);
+                        }
+                    }
+                });
+                
+                // Check again in an hour
+                setTimeout(checkReminders, 3600000);
+            }
+            
+            function renderTasks() {
+                if (tasks.length === 0) {
+                    taskList.innerHTML = '';
+                    emptyMessage.style.display = 'block';
+                    return;
+                }
+                
+                emptyMessage.style.display = 'none';
+                taskList.innerHTML = '';
+                
+                tasks.forEach(task => {
+                    const taskElement = document.createElement('li');
+                    taskElement.className = `task-item ${task.priority}`;
+                    taskElement.dataset.id = task.id;
+                    
+                    let dueText = '';
+                    if (task.dueDate) {
+                        const dueDate = new Date(task.dueDate);
+                        dueText = `Due: ${dueDate.toDateString()}`;
+                    }
+                    
+                    let reminderIcon = task.reminder ? ' <i class="fas fa-bell" style="color: #f59e0b; margin-left: 5px;"></i>' : '';
+                    
+                    taskElement.innerHTML = `
+                        <div class="task-checkbox">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                        </div>
+                        <div class="task-content">
+                            <div class="${task.completed ? 'completed' : ''}">${task.text}${reminderIcon}</div>
+                            ${dueText ? `<div class="task-due">${dueText}</div>` : ''}
+                        </div>
+                    `;
+                    
+                    taskList.appendChild(taskElement);
+                });
+            }
+            
+            function saveAndRender() {
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+            }
+            
+            // Set default username if not already set
+            if (!localStorage.getItem('username')) {
+                localStorage.setItem('username', 'Ansh200618');
+                updateUsername('Ansh200618');
+            }
+        });
+    </script>
+</body>
+</html>

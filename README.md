@@ -2,7 +2,7 @@
 
 A lightweight, browser-based task management application with a sleek UI, reminder system, and user personalization.
 
-![TaskMaster App Screenshot](https://via.placeholder.com/800x450.png?text=TaskMaster+App)
+![TaskMaster App Screenshot](https://via.placeholder.com/800x450.png?text=TaskMaster+App](https://ibb.co/F46kyhRd))
 
 ## Overview
 
